@@ -7,24 +7,47 @@
 	}
 
 	function listaUsuarios($session_usuario, $listaxeUsuarios) {
-		echo "O administrador <b>" . $session_usuario . "</b> loggeouse con éxito";
-		echo "<h3>Listaxe de usuarios</h3>";
-		echo "<table border=1 style='border-collapse:collapse; width:600px; text-align:center'>
-				<tr>
-					<th>Nome</th>
-					<th>Contrasinal</th>
-					<th>Rol</th>
-					<th>Última conexión</th>
-				</tr>";
-		while($fila=$listaxeUsuarios->fetch(PDO::FETCH_ASSOC)) {
-		    echo "<tr>
-					<td>" . $fila['nome'] . "</td>
-					<td>" . $fila['passwd'] . "</td>
-					<td>" . $fila['rol'] . "</td>
-					<td>" . $fila['ultima_conexion'] . "</td>
-				</tr>";
+		echo "<center>";
+			echo "O administrador <b>" . $session_usuario . "</b> loggeouse con éxito";
+			echo "<h3>Listaxe de usuarios</h3>";
+			echo "<table border=1 style='border-collapse:collapse; width:900px; text-align:center'>
+					<tr>
+						<th>Nome</th>
+						<th>Contrasinal</th>
+						<th>Rol</th>
+						<th>Última conexión</th>
+					</tr>";
+			while($fila=$listaxeUsuarios->fetch(PDO::FETCH_ASSOC)) {
+				echo "<tr>
+						<td>" . $fila['nome'] . "</td>
+						<td>" . $fila['passwd'] . "</td>
+						<td>" . $fila['rol'] . "</td>
+						<td>" . $fila['ultima_conexion'] . "</td>
+					</tr>";
+			}
+			echo "</table>";
+			formPecharSesion();
+		echo "</center>";
+	}
+
+	function actualizarUltimaConexion($conexionPDO, $nomeUsuario) {
+
+		date_default_timezone_set('Europe/Madrid');
+		$dataUltimaConexion = date("Y-m-d H:i:s");
+
+		try {
+
+			$actualizarUsuario = $conexionPDO->prepare("UPDATE usuarios SET ultima_conexion = :dataConexion WHERE nome = :nome");
+			$actualizarUsuario->bindParam(':nome', $nomeUsuario);
+			$actualizarUsuario->bindParam(':dataConexion', $dataUltimaConexion);
+			$actualizarUsuario->execute();
+
+		} catch (PDOException $error) {
+			die("Erro na consulta executada: " . $error->getMessage());
 		}
-		echo "</table>";
+		finally {
+			$actualizarUsuario = null;
+		}
 	}
 
 	try {
@@ -80,12 +103,13 @@
 				*/
 				if(isset($_SESSION['usuarios'])) {
 
+					actualizarUltimaConexion($conexionPDO, $_SESSION['usuarios']['nome']);
+
 					if ($_SESSION['usuarios']['rol'] == "admin") {
 						
 						try {
 							$listaxeUsuarios = $conexionPDO->query("SELECT * FROM usuarios");
 							listaUsuarios($_SESSION['usuarios']['nome'], $listaxeUsuarios);
-							formPecharSesion();
 
 						} catch (PDOException $error) {
 							die("Erro na consulta executada: " . $error->getMessage());
