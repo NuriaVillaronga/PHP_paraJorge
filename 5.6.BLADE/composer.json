@@ -1,0 +1,23 @@
+{
+    "name": "servidor/5.5.blade",
+    "description": "Primeiras probas con blade",
+    "type": "project",
+    "require": {
+        "philo/laravel-blade": "^3.1"
+    },
+    "config": {
+        "optimize-autoloader": true
+    },
+    "license": "GNU/GPL",
+    "autoload": {
+        "psr-4": {
+            "Clases\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Nuria",
+            "email": "nuria.villaronga@gmail.com"
+        }
+    ]
+}
