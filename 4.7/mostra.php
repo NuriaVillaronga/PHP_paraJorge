@@ -86,7 +86,7 @@
               </form>";                         
     }
 
-    
+
     try {
         $conexionPDO = new PDO("mysql:host=db-pdo;dbname=tarefa;charset=utf8mb4","root","root");
         $conexionPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -111,39 +111,39 @@
                 }
                 finally {
                     $existeUsuario = null;
-                } 
-
-                /**
-                * Posteriores accesos á páxina --> O usuario xa accedeu unha vez polo que os seus datos están almacenados en $_SESSION
-                */
-                if(isset($_SESSION['usuarios'])) {
-
-                    if ($_SESSION['usuarios']['rol'] == "Admin") {
-                        header('Location: ./xestiona.php');
-                    }
-
-                    if ($_SESSION['usuarios']['rol'] == "User") {
-                        
-                        try {
-                            $obterProductos = $conexionPDO->query("SELECT * FROM producto");
-                            echo "<center>";
-                                    amosarSaudoCookie();
-                                    listaProductosOfertados($obterProductos);
-                            echo "</center>";
-                            
-                        } catch (PDOException $error) {
-                            die("Erro na consulta executada: " . $error->getMessage());
-                        }
-                        finally {
-                            $obterProductos = null;
-                        }
-                    }   
                 }          
             }
             else {
                 die(mensaxeErrro("red","Os campos de acceso a loggin non poden estar baleiros"));
             }
         }
+
+        /**
+        * Posteriores accesos á páxina --> O usuario xa accedeu unha vez polo que os seus datos están almacenados en $_SESSION
+        */
+        if(isset($_SESSION['usuarios'])) {
+
+            if ($_SESSION['usuarios']['rol'] == "Admin") {
+                header('Location: ./xestiona.php');
+            }
+
+            if ($_SESSION['usuarios']['rol'] == "User") {
+                
+                try {
+                    $obterProductos = $conexionPDO->query("SELECT * FROM producto");
+                    echo "<center>";
+                            amosarSaudoCookie();
+                            listaProductosOfertados($obterProductos);
+                    echo "</center>";
+                    
+                } catch (PDOException $error) {
+                    die("Erro na consulta executada: " . $error->getMessage());
+                }
+                finally {
+                    $obterProductos = null;
+                }
+            }   
+        } 
 
     } catch (PDOException $error) {
         die("Erro na conexion coa base de datos: " . $error->getMessage());
