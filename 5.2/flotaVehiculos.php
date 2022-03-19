@@ -114,10 +114,9 @@ session_start();
      */
     if (isset($_GET['recuperarFicheiro'])) {
         $flotaArray = file("flota.txt"); 
-        $flota=[];
         for($i=0;$i<count($flotaArray);$i++)
         {
             $campo = explode("-", $flotaArray[$i]);
-            $flota[$campo[0]]= $campo[1];
+            $_SESSION['flota'][] = new Vehiculo($campo[0],$campo[1],$campo[2]);
         }
     }
