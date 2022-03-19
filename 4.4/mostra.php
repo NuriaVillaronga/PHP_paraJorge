@@ -6,9 +6,9 @@
 			</form>";
 	}
 
-	function listaUsuarios($session_usuario, $listaxeUsuarios) {
+	function listaUsuarios($listaxeUsuarios) {
 		echo "<center>";
-			echo "O administrador <b>" . $session_usuario . "</b> loggeouse con éxito";
+			echo "O administrador <b>" . $_SESSION['usuarios']['nome'] . "</b> loggeouse con éxito";
 			echo "<h3>Listaxe de usuarios</h3>";
 			echo "<table border=1 style='border-collapse:collapse; width:900px; text-align:center'>
 					<tr>
@@ -36,7 +36,6 @@
 		$dataUltimaConexion = date("Y-m-d H:i:s");
 
 		try {
-
 			$actualizarUsuario = $conexionPDO->prepare("UPDATE usuarios SET ultima_conexion = :dataConexion WHERE nome = :nome");
 			$actualizarUsuario->bindParam(':nome', $nomeUsuario);
 			$actualizarUsuario->bindParam(':dataConexion', $dataUltimaConexion);
@@ -61,74 +60,69 @@
 				/**
 				* Primer acceso á páxina --> almacenar datos en variable $_SESSION
 				*/
-				if (!isset($_SESSION['usuarios'])) {
-					
-					try {
-						$existeUsuario = $conexionPDO->prepare("SELECT * FROM usuarios WHERE nome = :usuario");
-						$existeUsuario->bindParam(':usuario', $_GET['usuario']);
-						$existeUsuario->execute();
-	
-						if ($existeUsuario->rowCount() == 0) {
-							header('Location: login.php');
-						}
-	
-						if ($existeUsuario->rowCount() != 0)  {
-							
-							$contrasinalBD = null;
-							$rol = null;
-	
-							while($fila=$existeUsuario->fetch(PDO::FETCH_ASSOC)) {
-								$contrasinalBD = $fila['passwd'];
-								$rolBD = $fila['rol'];
-							}
-	
-							if (password_verify($_GET['contrasinalLoggin'],$contrasinalBD)) {
-								$_SESSION['usuarios'] = ["nome"=>$_GET['usuario'], "contrasinal"=>$_GET['contrasinalLoggin'], "rol"=>$rolBD];
-							}
-							else {
-								echo "<h3>Non introduciches unha contrasinal correcta</h3>";
-							}
+				try {
+					$existeUsuario = $conexionPDO->prepare("SELECT * FROM usuarios WHERE nome = :usuario");
+					$existeUsuario->bindParam(':usuario', $_GET['usuario']);
+					$existeUsuario->execute();
+
+					if ($existeUsuario->rowCount() == 0) {
+						header('Location: login.php');
+					}
+
+					if ($existeUsuario->rowCount() != 0)  {
+
+						while($fila=$existeUsuario->fetch(PDO::FETCH_ASSOC)) {
+							$contrasinalBD = $fila['passwd'];
+							$rolBD = $fila['rol'];
 						}
 
-					} catch (PDOException $error) {
-						die("Erro na consulta executada: " . $error->getMessage());
+						if (password_verify($_GET['contrasinalLoggin'],$contrasinalBD)) {
+							$_SESSION['usuarios'] = ["nome"=>$_GET['usuario'], "contrasinal"=>$_GET['contrasinalLoggin'], "rol"=>$rolBD];
+						}
+						else {
+							echo "<h3>Non introduciches unha contrasinal correcta</h3>";
+						}
 					}
-					finally {
-						$existeUsuario = null;
-					}
+
+				} catch (PDOException $error) {
+					die("Erro na consulta executada: " . $error->getMessage());
 				}
-
-				/**
-				* Posteriores accesos á páxina --> O usuario xa accedeu unha vez polo que os seus datos están almacenados en $_SESSION
-				*/
-				if(isset($_SESSION['usuarios'])) {
-
-					actualizarUltimaConexion($conexionPDO, $_SESSION['usuarios']['nome']);
-
-					if ($_SESSION['usuarios']['rol'] == "admin") {
-						
-						try {
-							$listaxeUsuarios = $conexionPDO->query("SELECT * FROM usuarios");
-							listaUsuarios($_SESSION['usuarios']['nome'], $listaxeUsuarios);
-
-						} catch (PDOException $error) {
-							die("Erro na consulta executada: " . $error->getMessage());
-						}
-						finally {
-							$listaxeUsuarios = null;
-						}
-					}
-
-					if ($_SESSION['usuarios']['rol'] == "user") {
-						echo "O usuario <b>" . $_SESSION['usuarios']['nome'] . "</b> loggeouse con éxito";
-						formPecharSesion();
-					}   
+				finally {
+					$existeUsuario = null;
 				}           
             }
 			else {
 				echo "<h3>Os campos de acceso a loggin non poden estar baleiros</h3>";
 			}
 		}
+
+		/**
+		* Posteriores accesos á páxina --> O usuario xa accedeu unha vez polo que os seus datos están almacenados en $_SESSION
+		*/
+		if(isset($_SESSION['usuarios'])) {
+
+			actualizarUltimaConexion($conexionPDO, $_SESSION['usuarios']['nome']);
+
+			if ($_SESSION['usuarios']['rol'] == "admin") {
+				
+				try {
+					$listaxeUsuarios = $conexionPDO->query("SELECT * FROM usuarios");
+					listaUsuarios($listaxeUsuarios);
+
+				} catch (PDOException $error) {
+					die("Erro na consulta executada: " . $error->getMessage());
+				}
+				finally {
+					$listaxeUsuarios = null;
+				}
+			}
+
+			if ($_SESSION['usuarios']['rol'] == "user") {
+				echo "O usuario <b>" . $_SESSION['usuarios']['nome'] . "</b> loggeouse con éxito";
+				formPecharSesion();
+			}   
+		}
+
 	} catch (PDOException $error) {
 		die("Erro na conexion coa base de datos: " . $error->getMessage());
 	}

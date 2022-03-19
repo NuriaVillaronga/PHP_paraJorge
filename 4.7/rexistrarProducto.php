@@ -9,16 +9,6 @@
 
 <body>
 
-<?php
-    function mensaxeRexistro($cor, $mensaxe) {
-        echo "<center>
-                <p><br>
-                    <h3 style='color:".$cor.";'>".$mensaxe."<h3>
-                </p>
-                </center>";
-    }
-?>
-
   <center>
 		<h1>Rexistro de productos</h1>
         <form>
@@ -43,6 +33,33 @@
 
 <?php
 
+    function mensaxeRexistro($cor, $mensaxe) {
+        echo "<center>
+                <p><br>
+                    <h3 style='color:".$cor.";'>".$mensaxe."<h3>
+                </p>
+                </center>";
+    }
+
+    function insertarProducto($conexionPDO, $nome, $descripcion, $prezo, $imaxe) {
+        try {
+            $insertarProducto = $conexionPDO->prepare("INSERT INTO producto (nome, descripcion, prezoAluga, imaxe) VALUES (:nome, :descripcion, :prezo, :imaxe)");
+            $insertarProducto->bindParam(':nome', $nome);
+            $insertarProducto->bindParam(':descripcion', $descripcion);
+            $insertarProducto->bindParam(':prezo', $prezo);
+            $insertarProducto->bindParam(':imaxe', $imaxe);
+                    
+            $insertarProducto->execute();
+            mensaxeRexistro("green","O producto foi rexistrado con éxito");
+        }
+        catch (PDOException $error) {
+            die("Erro na consulta executada: " . $error->getMessage());
+        }
+        finally {
+            $insertarProducto = null; 
+        }
+    }
+
     try {
         $conexionPDO = new PDO("mysql:host=db-pdo;dbname=tarefa;charset=utf8mb4","root","root");
         $conexionPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -50,25 +67,14 @@
         if(isset($_GET['engadirProducto'])) {
 
             try {
-                $existeProducto = $conexionPDO->prepare("SELECT * FROM producto WHERE nome='{$_GET['nomeProducto']}'");
+                $existeProducto = $conexionPDO->prepare("SELECT * FROM producto WHERE nome = :nome");
+                $existeProducto->bindParam(':nome', $_GET['nomeProducto']);
                 $existeProducto->execute(); 
 
                 if($existeProducto->rowCount() == 0)
                 {
                     if (is_numeric($_GET['prezoProducto']) == true) {
-                        try {
-                            $insertarProducto = $conexionPDO->prepare("INSERT INTO producto (nome, descripcion, prezoAluga, imaxe) VALUES 
-                            ('{$_GET['nomeProducto']}', '{$_GET['descripcionProducto']}', '{$_GET['prezoProducto']}', '{$_GET['imaxeProducto']}')");
-                                    
-                            $insertarProducto->execute();
-                            mensaxeRexistro("green","O producto foi rexistrado con éxito");
-                        }
-                        catch (PDOException $error) {
-                            die("Erro na consulta executada: " . $error->getMessage());
-                        }
-                        finally {
-                            $insertarProducto = null; 
-                        }
+                        insertarProducto($conexionPDO, $_GET['nomeProducto'], $_GET['descripcionProducto'], $_GET['prezoProducto'], $_GET['imaxeProducto']);
                     }
                     else {
                         mensaxeRexistro("red","Non se pode engadir o novo producto. O prezo debe de ser un número");

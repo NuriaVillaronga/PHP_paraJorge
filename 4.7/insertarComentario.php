@@ -9,16 +9,6 @@
 
 <body>
 
-<?php
-    function mensaxeComentario($cor, $mensaxe) { 
-        echo "<center>
-                <p><br>
-                    <h3 style='color:".$cor.";'>".$mensaxe."<h3>
-                </p>
-                </center>";
-    }
-?>
-
   <center>
 		<h1>Rexistro de comentarios</h1>
         <form>
@@ -40,29 +30,42 @@
 
 <?php
 
+    function mensaxeComentario($cor, $mensaxe) { 
+        echo "<center>
+                <p><br>
+                    <h3 style='color:".$cor.";'>".$mensaxe."<h3>
+                </p>
+                </center>";
+    }
+
+    function insertarComentario($conexionPDO, $email, $comentario, $dataC) {
+        try {
+            $insertarComentario = $conexionPDO->prepare("INSERT INTO comentarios (emailComentario, comentario, dataComentario) VALUES (:email, :comentario, :dataC)");
+            $insertarComentario->bindParam(':email', $email);
+            $insertarComentario->bindParam(':comentario', $comentario);
+            $insertarComentario->bindParam(':dataC', $dataC);
+                                
+            $insertarComentario->execute();
+            mensaxeComentario("green","O comentario foi rexistrado con éxito"); 
+            
+        } 
+        catch (PDOException $error) {
+            die("Erro na consulta executada: " . $error->getMessage());
+        }
+        finally {
+            $insertarComentario = null;
+        }	
+    }
+
     try {
         $conexionPDO = new PDO("mysql:host=db-pdo;dbname=tarefa;charset=utf8mb4","root","root");
         $conexionPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         if(isset($_GET['engadirComentario'])) { 
-
             date_default_timezone_set('Europe/Madrid');
             $dataComentario = date("Y-m-d H:i:s");
 
-            try {
-                $insertarComentario = $conexionPDO->prepare("INSERT INTO comentarios (emailComentario, comentario, dataComentario) VALUES 
-                ('{$_SESSION['usuarios']['emailUsuario']}', '{$_GET['comentarioProducto']}', '$dataComentario')");
-                                    
-                $insertarComentario->execute();
-                mensaxeComentario("green","O comentario foi rexistrado con éxito"); 
-                
-            } 
-            catch (PDOException $error) {
-                die("Erro na consulta executada: " . $error->getMessage());
-            }
-            finally {
-                $insertarComentario = null;
-            }			
+            insertarComentario($conexionPDO, $_SESSION['usuarios']['emailUsuario'], $_GET['comentarioProducto'], $dataComentario);	
         }
             
     } catch (PDOException $error) {

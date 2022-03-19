@@ -4,7 +4,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
+    <title>Xestion</title>
 </head>
 <body>
 	<center>
@@ -19,6 +19,5 @@
 			<p><button formaction='./pechaSesion.php' name='peche'>Pechar sesión</button></p>
 		</form>
 	</center>
-
 </body>
 </html>

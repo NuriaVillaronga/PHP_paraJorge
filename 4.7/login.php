@@ -72,7 +72,6 @@
 
 		if(isset($_GET['engadirUsuario'])) {
 
-			$rol = "User";
 			date_default_timezone_set('Europe/Madrid');
 			$dataRexistro = date("Y-m-d H:i:s"); 
 			$hashedPass = password_hash($_GET['contrasinalRexistro'], PASSWORD_DEFAULT); 
@@ -83,7 +82,7 @@
 				$existeUsuario->execute();
 
 				if($existeUsuario->rowCount() == 0) {
-					insertarUsuario($conexionPDO, $_GET['usuario'], $_GET['nome'], $_GET['emailRexistro'], $dataRexistro, $rol, $hashedPass);
+					insertarUsuario($conexionPDO, $_GET['usuario'], $_GET['nome'], $_GET['emailRexistro'], $dataRexistro, "User", $hashedPass);
 				}
 				else {
 					mensaxeRexistro("red","O usuario que intentaches rexitrar xa existe!");
@@ -103,7 +102,7 @@
 	finally {
 		$conexionPDO = null;
 	}
-	
+
 ?>
 
 </body>
