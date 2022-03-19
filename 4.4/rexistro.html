@@ -7,7 +7,7 @@
 
 <body>
 
-    <form action="login.php" method="get">
+    <form method="get">
         <p>Nome: <input type="text" name="nome" size="30" required></p>
         <p>Contrasinal: <input type="password" name="contrasinal" size="30" required></p>
         <p>Rol: 
@@ -16,7 +16,7 @@
                 <option value="user">User</option>
             </select>
         </p>
-        <p><button type="submit" name="engadirRexistro">Rexistrar</button></p>
+        <p><button type="submit" formaction="login.php" name="engadirRexistro">Rexistrar</button></p>
     </form>
     
 </body>
