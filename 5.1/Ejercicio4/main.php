@@ -1,4 +1,4 @@
-<?php include './Ejercicio4.php';
+<?php include './Bombilla.php';
 
     $bombilla1 = new Bombilla();
     echo "Subida de potencia +20W: <b><u>" . $bombilla1->aumentaPotencia(20) . "W</u></b>";

@@ -1,4 +1,4 @@
-<?php include './Ejercicio3.php';
+<?php include './Bombilla.php';
 
     $bombilla = new Bombilla();
     $bombilla->setPotencia(60);

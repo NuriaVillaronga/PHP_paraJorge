@@ -1,10 +1,6 @@
 <?php 
-include 'vehiculo.php'; 
+include 'Vehiculo.php'; 
 session_start();
-/*
-session_unset();
-session_destroy();
-*/
 ?>
 
     <center>
@@ -21,11 +17,18 @@ session_destroy();
 				</p>
 			</form>
 		</p>
+        <p><br>
+            <form method='get'>
+                <button formaction='flotaVehiculos.php' name='gardarFicheiro'>Gardar datos en ficheiro</button>
+                <p><button formaction='flotaVehiculos.php' name='recuperarFicheiro'>Recuperar datos de ficheiro</button></p>
+                <p><button formaction='./pecharSesion.php' name='peche'>Pechar sesión</button></p>
+            </form>
+        </p>
 	</center>
 
 <?php
 
-    function mensaxeErro($cor, $mensaxe) {
+    function mensaxe($cor, $mensaxe) {
         echo "<center>
                 <p><br>
                     <h3 style='color:".$cor.";'>".$mensaxe."<h3>
@@ -33,17 +36,7 @@ session_destroy();
             </center>";
     }
 
-    if (isset($_GET['engadir'])) {
-        if (is_numeric($_GET['kms']) == true) {
-            $_SESSION['flota'][] = new Vehiculo($_GET['matricula'],$_GET['modelo'],$_GET['kms']);
-        }
-        else {
-            mensaxeErro("red","Nos kms debes introducir un número válido");
-        }
-    }
-
-    if (empty($_SESSION['flota']) == false) {
-        
+    function listaxeVehiculos() {
         echo "<center><h1>Listaxe de vehículos</h1>
                 <table border=1 style='border-collapse:collapse; width:600px; text-align:center;'>
                     <tr>
@@ -55,8 +48,76 @@ session_destroy();
                 echo $vehiculo->mostraEnTR();
             }
         echo "</table>
-            </center>";
+           </center>";
+    }
+
+    function gardarDatosFicheiro() {
+        if(!($ficheiro=fopen('flota.txt','w'))) {
+            return;
+        }
+        else {
+            foreach ($_SESSION['flota'] as $object=>$vehiculo) {
+                fprintf($ficheiro,"%s-%s-%s\n",$vehiculo->getMatricula(),$vehiculo->getModelo(),$vehiculo->getKms());
+            }
+        }
+    }
+
+    /**
+     * Engadir vehiculo
+     */
+    if (isset($_GET['engadir'])) {
+        if (is_numeric($_GET['kms']) == true) {
+            
+            //Evitar repeticion de vehiculos con = caracteristicas
+            
+            if (isset($_SESSION['flota'])) {
+                foreach ($_SESSION['flota'] as $object=>$vehiculo) {
+                    if ($vehiculo->getMatricula() == $_GET['matricula'] && $vehiculo->getModelo() == $_GET['modelo'] && $vehiculo->getKms() == $_GET['kms']) {
+                        mensaxe("red","Xa existe un vehículo con estas caracteristicas");
+                        die();
+                    }
+                }
+            }
+            
+            $_SESSION['flota'][] = new Vehiculo($_GET['matricula'],$_GET['modelo'],$_GET['kms']);
+        }
+        else {
+            mensaxe("red","Nos kms debes introducir un número válido");
+        }
+    }
+
+    /**
+     * Listar vehiculos
+     */
+    if (isset($_SESSION['flota'])) {
+        listaxeVehiculos();
     }
     else {
-        mensaxeErro("purple","Todavía non hay vehículos que mostrar. Rexistra un vehículo!");
+        mensaxe("purple","Todavía non hay vehículos que mostrar. Rexistra un vehículo!");
+    }
+
+    /**
+     * Gardar vehiculos en ficheiro
+     */
+    if (isset($_GET['gardarFicheiro'])) {
+        if (empty($_SESSION['flota']) == false) {
+            gardarDatosFicheiro();
+            mensaxe("green","Ficheiro creado!");
+        }
+        else {
+            mensaxe("red","Non hai datos para gardar no ficheiro"); 
+        }
+    }
+
+    /**
+     * Recuperar vehiculos do ficheiro
+     */
+    if (isset($_GET['recuperarFicheiro'])) {
+        $flotaArray = file("flota.txt"); 
+        $flota=[];
+        for($i=0;$i<count($flotaArray);$i++)
+        {
+            $campo = explode("-", $flotaArray[$i]);
+            $flota[$campo[0]]= $campo[1];
+        }
     }
