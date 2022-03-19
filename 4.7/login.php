@@ -42,12 +42,29 @@
 			  </center>";
 	}
 
-    if (isset($_GET['contrasinalRexistro'])) {
-        $hashedPasswordRexistro = password_hash($_GET['contrasinalRexistro'], PASSWORD_DEFAULT); 
-    }
-    $rolRexistro = "User";
-    date_default_timezone_set('Europe/Madrid');
-    $dataRexistro = date("Y-m-d H:i:s");
+
+	function insertarUsuario($conexionPDO, $usuario, $nome, $email, $data, $rol, $hashedPass) {
+		try {
+			$insertarUsuario = $conexionPDO->prepare("INSERT INTO usuarios (nome, nomeCompleto, email, contrasinal, dataConexion, rol) VALUES (:usuario, :nome, :email, :contrasinal, :dataRexistro, :rol)");
+			
+			$insertarUsuario->bindParam(':usuario', $usuario);
+			$insertarUsuario->bindParam(':nome', $nome);
+			$insertarUsuario->bindParam(':email', $email);
+			$insertarUsuario->bindParam(':contrasinal', $hashedPass);
+			$insertarUsuario->bindParam(':dataRexistro', $data);
+			$insertarUsuario->bindParam(':rol', $rol);
+					
+			$insertarUsuario->execute();
+			mensaxeRexistro("green","Usuario rexistrado con éxito! Loggeate");
+		}
+		catch (PDOException $error) {
+			die("Erro na consulta executada: " . $error->getMessage());
+		}
+		finally {
+			$insertarUsuario = null;
+		}
+	}
+
 
 	try {
 		$conexionPDO = new PDO("mysql:host=db-pdo;dbname=tarefa;charset=utf8mb4","root","root");
@@ -55,25 +72,18 @@
 
 		if(isset($_GET['engadirUsuario'])) {
 
+			$rol = "User";
+			date_default_timezone_set('Europe/Madrid');
+			$dataRexistro = date("Y-m-d H:i:s"); 
+			$hashedPass = password_hash($_GET['contrasinalRexistro'], PASSWORD_DEFAULT); 
+
 			try {
-				$existeUsuario = $conexionPDO->prepare("SELECT * FROM usuarios WHERE email='{$_GET['emailRexistro']}'");
+				$existeUsuario = $conexionPDO->prepare("SELECT * FROM usuarios WHERE email= :email");
+				$existeUsuario->bindParam(':email', $_GET['emailRexistro']);
 				$existeUsuario->execute();
 
-				if($existeUsuario->rowCount() == 0)
-				{
-					try {
-						$insertarUsuario = $conexionPDO->prepare("INSERT INTO usuarios (nome, nomeCompleto, email, contrasinal, dataConexion, rol) VALUES 
-						('{$_GET['usuario']}', '{$_GET['nome']}', '{$_GET['emailRexistro']}', '$hashedPasswordRexistro', '$dataRexistro', '$rolRexistro')");
-								
-						$insertarUsuario->execute();
-						mensaxeRexistro("green","Usuario rexistrado con éxito! Loggeate");
-					}
-					catch (PDOException $error) {
-						die("Erro na consulta executada: " . $error->getMessage());
-					}
-					finally {
-						$insertarUsuario = null;
-					}
+				if($existeUsuario->rowCount() == 0) {
+					insertarUsuario($conexionPDO, $_GET['usuario'], $_GET['nome'], $_GET['emailRexistro'], $dataRexistro, $rol, $hashedPass);
 				}
 				else {
 					mensaxeRexistro("red","O usuario que intentaches rexitrar xa existe!");
@@ -93,7 +103,7 @@
 	finally {
 		$conexionPDO = null;
 	}
-
+	
 ?>
 
 </body>
