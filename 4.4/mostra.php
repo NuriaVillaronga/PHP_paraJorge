@@ -30,6 +30,33 @@
 		echo "</center>";
 	}
 
+	function obterListadoUsuarios($conexionPDO) {
+		try {
+			$listaxeUsuarios = $conexionPDO->query("SELECT * FROM usuarios");
+			listaUsuarios($listaxeUsuarios);
+
+		} catch (PDOException $error) {
+			die("Erro na consulta executada: " . $error->getMessage());
+		}
+		finally {
+			$listaxeUsuarios = null;
+		}
+	}
+
+	function creacionSessionUsuario($existeUsuario) {
+		while($fila=$existeUsuario->fetch(PDO::FETCH_ASSOC)) {
+			$contrasinalBD = $fila['passwd'];
+			$rolBD = $fila['rol'];
+		}
+
+		if (password_verify($_GET['contrasinalLoggin'],$contrasinalBD)) {
+			$_SESSION['usuarios'] = ["nome"=>$_GET['usuario'], "contrasinal"=>$_GET['contrasinalLoggin'], "rol"=>$rolBD];
+		}
+		else {
+			echo "<h3>Non introduciches unha contrasinal correcta</h3>";
+		}
+	}
+
 	function actualizarUltimaConexion($conexionPDO, $nomeUsuario) {
 
 		date_default_timezone_set('Europe/Madrid');
@@ -70,18 +97,7 @@
 					}
 
 					if ($existeUsuario->rowCount() != 0)  {
-
-						while($fila=$existeUsuario->fetch(PDO::FETCH_ASSOC)) {
-							$contrasinalBD = $fila['passwd'];
-							$rolBD = $fila['rol'];
-						}
-
-						if (password_verify($_GET['contrasinalLoggin'],$contrasinalBD)) {
-							$_SESSION['usuarios'] = ["nome"=>$_GET['usuario'], "contrasinal"=>$_GET['contrasinalLoggin'], "rol"=>$rolBD];
-						}
-						else {
-							echo "<h3>Non introduciches unha contrasinal correcta</h3>";
-						}
+						creacionSessionUsuario($existeUsuario);
 					}
 
 				} catch (PDOException $error) {
@@ -104,19 +120,8 @@
 			actualizarUltimaConexion($conexionPDO, $_SESSION['usuarios']['nome']);
 
 			if ($_SESSION['usuarios']['rol'] == "admin") {
-				
-				try {
-					$listaxeUsuarios = $conexionPDO->query("SELECT * FROM usuarios");
-					listaUsuarios($listaxeUsuarios);
-
-				} catch (PDOException $error) {
-					die("Erro na consulta executada: " . $error->getMessage());
-				}
-				finally {
-					$listaxeUsuarios = null;
-				}
+				obterListadoUsuarios($conexionPDO);
 			}
-
 			if ($_SESSION['usuarios']['rol'] == "user") {
 				echo "O usuario <b>" . $_SESSION['usuarios']['nome'] . "</b> loggeouse con éxito";
 				formPecharSesion();

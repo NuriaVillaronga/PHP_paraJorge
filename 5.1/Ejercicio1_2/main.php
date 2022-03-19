@@ -1,4 +1,4 @@
-<?php include './Ejercicio1_2.php';
+<?php include './Contacto.php';
 
     $contacto1 = new Contacto("nuria","villaronga guillán","986552413");
     $contacto2 = new Contacto("moraima","villaronga guillán","986501927");

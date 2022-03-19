@@ -17,6 +17,25 @@
 
 <?php
 
+	function insertarUsuario($conexionPDO, $hashedPasswd, $dataRexistro, $rol) {
+		try {
+			$insertarUsuario = $conexionPDO->prepare("INSERT INTO usuarios (nome, passwd, ultima_conexion, rol) VALUES (:nome, :contrasinal, :dataRexistro, :rol)");
+			$insertarUsuario->bindParam(':nome', $_GET['nome']);
+			$insertarUsuario->bindParam(':contrasinal', $hashedPasswd);
+			$insertarUsuario->bindParam(':dataRexistro', $dataRexistro);
+			$insertarUsuario->bindParam(':rol', $rol);
+					
+			$insertarUsuario->execute();
+			echo "<h3>Usuario rexistrado con éxito! Loggeate</3>";
+		}
+		catch (PDOException $error) {
+			die("Erro na consulta executada: " . $error->getMessage());
+		}
+		finally {
+			$insertarUsuario = null;
+		}
+	}
+
 	try {
 		$conexionPDO = new PDO("mysql:host=db-pdo;dbname=crud;charset=utf8mb4", "root", "root");
 		$conexionPDO->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -34,25 +53,8 @@
 				$existeUsuario->bindParam(':nome', $_GET['nome']);
 				$existeUsuario->execute();
 
-				if($existeUsuario->rowCount() == 0)
-				{
-					try {
-						
-						$insertarUsuario = $conexionPDO->prepare("INSERT INTO usuarios (nome, passwd, ultima_conexion, rol) VALUES (:nome, :contrasinal, :dataRexistro, :rol)");
-						$insertarUsuario->bindParam(':nome', $_GET['nome']);
-						$insertarUsuario->bindParam(':contrasinal', $hashedPasswd);
-						$insertarUsuario->bindParam(':dataRexistro', $dataRexistro);
-						$insertarUsuario->bindParam(':rol', $_GET['rol']);
-								
-						$insertarUsuario->execute();
-						echo "<h3>Usuario rexistrado con éxito! Loggeate</3>";
-					}
-					catch (PDOException $error) {
-						die("Erro na consulta executada: " . $error->getMessage());
-					}
-					finally {
-						$insertarUsuario = null;
-					}
+				if($existeUsuario->rowCount() == 0){
+					insertarUsuario($conexionPDO, $hashedPasswd, $dataRexistro, $_GET['rol']);
 				}
 				else {
 					echo "<h3>O usuario que intentaches rexitrar xa existe!</h3>";
