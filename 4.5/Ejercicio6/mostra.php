@@ -7,7 +7,7 @@
             setcookie("Texto","Benvido a actividade 6 de cookies");
         }
         if ($_GET['idioma'] == "ingles") {
-            setcookie("Texto","Welcome to cookie activity 6"); 
+            setcookie("Texto","Welcome to activity 6 of cookies"); 
         }
     }
 
