@@ -1,6 +1,6 @@
 <?php
 
-class Resta extends Calculo {
+class RestaSC extends CalculoSC {
 
     public function calcular() {
         if ($this->operando1 != null and $this->operando2 != null and is_numeric($this->operando1) == true and is_numeric($this->operando2) == true) {

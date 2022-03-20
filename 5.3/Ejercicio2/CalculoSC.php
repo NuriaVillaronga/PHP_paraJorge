@@ -1,6 +1,6 @@
 <?php
 
-abstract class Calculo {
+abstract class CalculoSC {
     
     protected $operando1; 
     protected $operando2;
