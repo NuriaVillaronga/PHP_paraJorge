@@ -8,6 +8,27 @@
               </center>";
     }
 
+    function setSaudoCookie($sesion) {
+        if (isset($_POST['idioma'])) {
+            if ($_POST['idioma'] == "castelan") {
+                setcookie("Saludo","Bienvenido ".$sesion);
+            }
+            if ($_POST['idioma'] == "galego") {
+                setcookie("Saludo","Benvido ".$sesion);
+            }
+        }
+    }
+
+    function amosarSaudoCookie() {
+        if(!empty($_COOKIE)) {
+            foreach ($_COOKIE as $key=>$value) {
+                if ($key == "Saludo") {
+                    echo "<center><p><br><h2 style='color:#67009B;'><u>".$value."</u></h2></p></center>";
+                }
+            }
+        }
+    }
+
     function opcionsAdmin() {
         echo "<center>
                 <p><br><h1>Accións a realizar</h1></p>
@@ -50,6 +71,7 @@
 
                 if (password_verify($_POST['contrasinal'], $contrasinalBD)) {
                     $_SESSION['usuarios'] = ["nome_usuario" => $nome, "email" => $_POST['email'], "rol" => $rol, "contrasinal" => $_POST['contrasinal']];
+                    setSaudoCookie($_SESSION['usuarios']['nome_usuario']);
                 }
                 else {
                     mensaxe("red", "O contrasinal introducido non é correcto");
@@ -90,9 +112,11 @@
             actualizarDataConexion($conexionPDO);
 
             if($_SESSION['usuarios']['rol'] == "Admin") {
+                amosarSaudoCookie();
                 opcionsAdmin();
             }
             if($_SESSION['usuarios']['rol'] == "User") {
+                amosarSaudoCookie();
                 opcionsUser();
             }
         }
