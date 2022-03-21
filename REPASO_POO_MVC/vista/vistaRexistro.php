@@ -17,7 +17,7 @@
                         </p>
                         <p>
                             <br>
-                            <button type='submit' name='enviarRexistro'>Rexistrar</button>
+                            <button type='submit' formaction='../controlador/RexistroControlador.php' name='enviarRexistro'>Rexistrar</button>
                         </p>
                     </form>
                     <form method='post'>

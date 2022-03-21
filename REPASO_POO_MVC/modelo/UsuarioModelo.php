@@ -22,6 +22,11 @@ class UsuarioModelo extends Usuario{
                 </center>";
     }
 
+    public static function pecharSesion() {
+        session_destroy();
+        header('Location:../controlador/LogginControlador.php');
+    }
+
     public static function obterRolUsuario($email, $contrasinal) : string {
 
         $conexionPDO = new Conexion(); 
@@ -177,4 +182,5 @@ class UsuarioModelo extends Usuario{
 
         return UsuarioModelo::mensaxe("green", "O usuario foi rexistrado con éxito");
     }
+
 }

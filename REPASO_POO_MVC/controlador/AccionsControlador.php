@@ -1,5 +1,4 @@
-<?php
-
+<?php 
 require_once('../modelo/UsuarioModelo.php');
 require_once('../vista/vistaAccions.php');
 
@@ -13,6 +12,10 @@ require_once('../vista/vistaAccions.php');
         if ($rol == "Admin") {
             opcionsAdmin();
         }
+    }
+
+    if (isset($_POST['pecharSesion'])) {
+        UsuarioModelo::pecharSesion();
     }
 
 ?>
